@@ -1,0 +1,18 @@
+@import helper._
+@(message: String)
+
+@main("Welcome to Play") {
+
+    @(message)
+
+	@form(action = routes.Application.upload, 'enctype -> "multipart/form-data") {
+	    
+	    <input type="file" name="text">
+	    
+	    <p>
+	        <input type="submit">
+	    </p>
+	    
+	}
+
+}
