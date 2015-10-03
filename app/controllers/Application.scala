@@ -33,23 +33,20 @@ class Application extends Controller {
           val new_el = Node(new_pre, 0)
           stack = new_el :: stack
           response += s"<$tag pre=$new_pre>"
-          // stack = stack.map(_._1, _._2+1)
         }
         case EvText(text) => {
           val pattern = """\w+""".r
           response = response + text
           val matches = pattern.findAllIn(text)
           var count = 0
-          var tokens: List[String] = List()
           var tok_string = ""
           matches.foreach { e =>
-            tokens = text.substring(matches.start(0),matches.end(0)) :: tokens
-            tok_string = tok_string + s"'${matches.group(0)}':${matches.start(0)}:${matches.end(0)}, "
+            tok_string = tok_string + s"'${matches.group(0)}':${matches.start(0)}:${matches.end(0)} "
             val token = Token(stack.head.pre, matches.group(0), matches.start(0),matches.end(0))
             index = token :: index
             count += 1
           }
-          response = response + s"($count tokens$tok_string)"
+          if (count > 0) response = response + s"( $count tokens: $tok_string)"
         }
         case EvElemEnd(prefix,tag) => {
           val done = stack.head
@@ -57,12 +54,13 @@ class Application extends Controller {
           val parent = stack.head
           val updated_parent = Node(parent.pre, parent.size + done.size + 1)
           val dist = done.pre - parent.pre
-          stack = updated_parent :: stack.tail            
+          stack = updated_parent :: stack.tail
           response += s"</$tag pre=${done.pre} dist=$dist size=${done.size} >"
         }
         case _ => {}
       }
-      response += s"${index.length} TOTAL TOKENS"
+      index = index.sortBy( t => (t.content, t.node_pre) )
+      response += s"\n${index.length} TOTAL TOKENS\n" + index.toString
       Ok(response)
   	}.getOrElse {
   		Redirect(routes.Application.index)
