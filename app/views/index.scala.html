@@ -1,18 +1,19 @@
 @import helper._
-@(message: String)
 
 @main("Welcome to Play") {
-
-    @(message)
-
-	@form(action = routes.Application.upload, 'enctype -> "multipart/form-data") {
-	    
-	    <input type="file" name="text">
-	    
-	    <p>
-	        <input type="submit">
-	    </p>
-	    
-	}
-
+    <div class="row" style="margin-top:40px;">
+        <div class="col-md-1" ></div>
+        <div class="col-md-10" style="border:solid 1px lightgray; overflow-y: scroll; height: 600px" >
+            <ul id="socket" class="list-unstyled"></ul>
+        </div>
+    </div>
+	<div id="form" class="row">
+        <div class="col-md-1"></div>
+        <form id="console-form">
+            <div class="input-group col-md-10">
+                <span class="input-group-addon">$></span>
+                <input type="text" class="form-control" aria-label="Console" id="console" name="console" placeholder=":dir, :freq, <x>"/>
+            </div>
+        </form>
+	</div>
 }
