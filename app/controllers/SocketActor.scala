@@ -1,12 +1,7 @@
-package controllers
-
-import java.io.File
-import java.util.Date
-
+package actors
 
 import akka.actor._
 import scala.collection.immutable.{TreeSet, HashMap}
-import scala.xml.pull.{EvText, XMLEventReader, XMLEvent}
 
 abstract class Command
 case class Search(query: String) extends Command
@@ -15,11 +10,9 @@ case class Dir() extends Command
 case class Freq() extends Command
 case class Drop() extends Command
 
-case class TokenRec(file:Int, pos:Int)
-
 class SocketActor(out:ActorRef, index:ActorRef, basedir:String) extends Actor {
   var counter = 0
-  var searchActor = context.system.actorOf(Props(new ContextActor))
+  val searchActor = context.system.actorOf(Props(new ContextActor))
   def receive = {
     case msg: String =>
       val command = parseCommand(msg)

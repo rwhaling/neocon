@@ -1,16 +1,18 @@
 package controllers
 
 import java.io.File
-
 import akka.actor._
-import play.api.libs.iteratee.{Concurrent, Iteratee, Enumerator}
+import play.api.{Play, Application}
 import play.api.mvc._
 import play.api.Play.current
 import play.api.libs.concurrent.Akka.system
-class Application extends Controller {
 
-  val basedir = "/Users/rwhaling/Documents/shakespeare"
+import actors._
+
+class Application extends Controller {
   val indexActor:ActorRef = system.actorOf(Props(new IndexActor))
+
+  val basedir = Play.configuration.getString("neocon.basedir").get
 
   val d = new File(basedir)
   if (d.exists && d.isDirectory) {

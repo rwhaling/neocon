@@ -1,4 +1,4 @@
-package controllers
+package actors
 
 import akka.actor.Actor
 
@@ -30,9 +30,9 @@ class ContextActor() extends Actor {
         currentPos += 1
       }
       currentEvent match {
-        case Some(EvText(text:String)) => {
+        case Some(EvText(text:String)) =>
           sender ! SearchContext(shortfn,text)
-        } case _ => {}
+        case _ =>
       }
     }
   }

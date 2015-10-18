@@ -1,4 +1,4 @@
-package controllers
+package actors
 
 import scala.io.Source
 import scala.xml.pull.{EvElemEnd, EvText, EvElemStart, XMLEventReader}

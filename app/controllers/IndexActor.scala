@@ -1,9 +1,7 @@
-package controllers
+package actors
 
 import java.util.Date
-
 import akka.actor.Actor
-
 import scala.collection.immutable.HashMap
 import scala.collection.mutable
 import scala.io.Source
@@ -25,33 +23,14 @@ class IndexActor() extends Actor {
   def receive = {
     case Parse(fn) =>
       System.out.print("indexing " + fn + " ... ")
-      val start = new Date().getTime
-      val source = Source.fromFile(fn)
-      val reader = new XMLEventReader(source)
       docs += currentDoc -> fn
-      var elCount = 0
-      for (event <- reader) {
-        event match {
-          case EvText(text) => {
-            val pattern = """\w+""".r
-            val matches = pattern.findAllIn(text)
-            var tokCount = 0
-            matches.foreach { tok =>
-              val k = tok.toString.toLowerCase
-              if (!index.contains(k)) {
-                index += k -> new mutable.TreeSet[IndexRecord]
-              }
-              val r = index(k)
-              r += IndexRecord(currentDoc,elCount)
-            }
-          } case _ =>
-        }
-        elCount += 1
-      }
+      val start = new Date().getTime
+      parse(fn)
       val stop = new Date().getTime
       System.out.print("done in " + (stop - start) + "ms\n" )
       currentDoc += 1
     case Drop() =>
+      println("DROP")
       index = index.empty
     case Dir() =>
       System.out.println("DIR RECEIVED")
@@ -60,7 +39,6 @@ class IndexActor() extends Actor {
       }
     case Freq() =>
       println("FREQ")
-
       for ( (word,entries) <- index.iterator.toList.sortBy(- _._2.size )) {
         sender ! FrequencyResult(word,entries.size)
       }
@@ -72,5 +50,29 @@ class IndexActor() extends Actor {
           sender ! SearchResult(q,fn,rec.pos)
         }
       }
+  }
+
+  def parse(file:String) = {
+    val source = Source.fromFile(file)
+    val reader = new XMLEventReader(source)
+    var elCount = 0
+    for (event <- reader) {
+      event match {
+        case EvText(text) => {
+          val pattern = """\w+""".r
+          val matches = pattern.findAllIn(text)
+          matches.foreach { tok =>
+            val k = tok.toString.toLowerCase
+            if (!index.contains(k)) {
+              index += k -> new mutable.TreeSet[IndexRecord]
+            }
+            val r = index(k) + IndexRecord(currentDoc,elCount)
+            index += k -> r
+//            r += IndexRecord(currentDoc,elCount)
+          }
+        } case _ =>
+      }
+      elCount += 1
+    }
   }
 }
