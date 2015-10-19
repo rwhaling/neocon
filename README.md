@@ -1,20 +1,21 @@
 neocon: a New (neo) Concordance Framework
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=========================================
+
 neocon is an in-memory concordance framework, using Akka, Scala, and Play.  
 
 Overview
-~~~~~~~~
+--------
 At startup, an IndexActor is created, which parses and tokenizes all xml files stored at the location specified by key `neocon.basedir` in `conf/application.conf`, and stores them as an in-memory `HashMap`, with the index entries stored as sorted `TreeSet`s per-word. 
 Each client maintains a persistent websocket to the server, which allocates a SocketActor for the lifetime of the session.  
 The socket actor accepts certain meta commands, :dir to list loaded documents, and :freq for a word frequency table; otherwise, all queries are interpreted as index lookups, which are streamed out to the client in bulk.
 
 Usage
-~~~~~
+-----
 >sbt run
 browse to localhost:9000
 
 TODO
-~~~~
+----
 1. docker
 2. evaluate phrase queries
 3. parse metadata from XML
@@ -26,7 +27,7 @@ TODO
 9. Redis backend
 
 About the name
-~~~~~~~~~~~~~~
+--------------
 I learned to use concordances when I was reading Plato; specifically, I was using [PhiloLogic](https://github.com/ARTFL-Project/PhiloLogic4), [Perseus](http://www.perseus.tufts.edu/hopper/), and the Thesaurus Linguae Graecae(http://stephanus.tlg.uci.edu/) while reading Meno, Phaedrus, and the Republic.
 I took at least one course where I read Plato each term for the first two years of college, and by far the best teacher I had was the late [Herman Sinaiko](http://news.uchicago.edu/article/2011/10/05/herman-l-sinaiko-longtime-college-professor-and-plato-scholar-1929-2011).  
 Sinaiko was a student of [Leo Strauss](https://en.wikipedia.org/wiki/Leo_Strauss), who taught a great number of [conservative and not-so-conservative](https://en.wikipedia.org/wiki/Leo_Strauss#Straussianism) students, including, notoriously, "architect of the Iraq War" [Paul Wolfowitz](https://en.wikipedia.org/wiki/Paul_Wolfowitz).  
