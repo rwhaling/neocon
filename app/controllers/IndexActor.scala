@@ -4,9 +4,10 @@ import java.util.Date
 import akka.actor.Actor
 import scala.collection.immutable.HashMap
 import scala.collection.mutable
-import scala.io.Source
+import scala.io.{ Source => IOSource }
 import scala.xml.pull.{EvText, XMLEventReader}
 import scala.math.Ordered.orderingToOrdered
+import akka.stream.scaladsl.Source
 
 case class SearchResult(w:String, doc:String, pos:Int)
 case class FrequencyResult(w:String, freq:Int)
@@ -45,20 +46,18 @@ class IndexActor() extends Actor {
     case Search(q) =>
       println("SEARCH")
       if (index.contains(q)) {
-        for (rec <- index(q)) {
-          val fn = docs(rec.doc)
-          sender ! SearchResult(q,fn,rec.pos)
-        }
+        val stream = Source(index(q).toList).map( rec => SearchResult(q,docs(rec.doc),rec.pos))
+        sender ! stream
       }
   }
 
   def parse(file:String) = {
-    val source = Source.fromFile(file)
+    val source = IOSource.fromFile(file)
     val reader = new XMLEventReader(source)
     var elCount = 0
     for (event <- reader) {
       event match {
-        case EvText(text) => {
+        case EvText(text) =>
           val pattern = """\w+""".r
           val matches = pattern.findAllIn(text)
           matches.foreach { tok =>
@@ -68,9 +67,8 @@ class IndexActor() extends Actor {
             }
             val r = index(k) + IndexRecord(currentDoc,elCount)
             index += k -> r
-//            r += IndexRecord(currentDoc,elCount)
           }
-        } case _ =>
+        case _ =>
       }
       elCount += 1
     }

@@ -18,16 +18,44 @@
         <script src="@routes.Assets.versioned("javascripts/hello.js")" type="text/javascript"></script>
         <script type="text/javascript">
             var ws = new WebSocket("ws://localhost:9000/ws");
+            var newmsg;
+            var more_requested = true;
             ws.onmessage =  function( message ) {
-                $("#socket").append("<li>" + message.data + "</li>");
+                newmsg = $("#socket").append("<li>" + message.data + "</li>");
+                more_requested = false;
             };
+
+            function atBottom() {
+            	var scroller = $("#scroller");
+            	var content = $("#socket");
+            	var totalHeight = content.height() + parseInt(content.css("margin-bottom"));
+            	var paneHeight = scroller.height();
+            	var current_position = scroller.scrollTop() + scroller.height();
+            	console.log(current_position,totalHeight);
+            	if ( (current_position + paneHeight + paneHeight) < totalHeight ) {
+            		console.log("not at bottom");
+            		return false;
+            	} else {            		
+            		console.log("at bottom");
+            		return true;
+            	}
+            }
+
             $(document).ready( function() {
                 $("#console-form").submit(function(event) {
                     event.preventDefault();
                     var message = $("#console").val();
                     $("#console").val("");
                     ws.send(message);
-                })
+	                more_requested = false;
+                });
+                $("#scroller").scroll(function(event){
+                	if (atBottom() && !more_requested) {
+                		ws.send(":more");
+                		more_requested = true;
+                	}
+                });
+
             });
         </script>
     </head>
